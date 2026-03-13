@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerund vs Infinitive O'yini</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0c29;
+    --card: #1a1640;
+    --gerund: #f7971e;
+    --infinitive: #56ccf2;
+    --correct: #43e97b;
+    --wrong: #f5576c;
+    --text: #f0eeff;
+    --muted: #8b82c4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    background-image: radial-gradient(ellipse at 20% 50%, #302b63 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 20%, #24243e 0%, transparent 60%);
+  }
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    text-align: center;
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, var(--gerund), var(--infinitive));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 16px; text-align: center; }
+  .mode-select { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; justify-content: center; }
+  .mode-btn {
+    padding: 9px 20px; border-radius: 50px; border: 2px solid #2e2a60;
+    background: var(--card); color: var(--muted); font-family: 'Nunito', sans-serif;
+    font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.2s;
+  }
+  .mode-btn.active, .mode-btn:hover { border-color: var(--infinitive); color: var(--infinitive); background: rgba(86,204,242,0.1); }
+  .scorebar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; justify-content: center; }
+  .score-box {
+    background: var(--card); border-radius: 14px; padding: 7px 16px;
+    font-weight: 800; font-size: 0.9rem; border: 2px solid #2e2a60;
+    display: flex; gap: 6px; align-items: center;
+  }
+  .progress-wrap { width: 100%; max-width: 620px; height: 8px; background: #2e2a60; border-radius: 99px; margin-bottom: 20px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--gerund), var(--infinitive)); border-radius: 99px; transition: width 0.4s ease; }
+  .card {
+    background: var(--card); border: 2px solid #2e2a60; border-radius: 24px;
+    padding: 26px 22px; max-width: 620px; width: 100%; text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4); position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: -60px; right: -60px;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(86,204,242,0.08), transparent); pointer-events: none;
+  }
+  .question-num { font-size: 0.75rem; color: var(--muted); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+  .category-tag {
+    display: inline-block; font-size: 0.68rem; font-weight: 800; letter-spacing: 1.5px;
+    text-transform: uppercase; padding: 3px 10px; border-radius: 50px; margin-bottom: 8px;
+  }
+  .cat-gerund { background: rgba(247,151,30,0.15); color: var(--gerund); border: 1px solid var(--gerund); }
+  .cat-infinitive { background: rgba(86,204,242,0.15); color: var(--infinitive); border: 1px solid var(--infinitive); }
+  .sentence { font-size: clamp(1rem, 3vw, 1.3rem); font-weight: 700; line-height: 1.7; margin-bottom: 8px; min-height: 60px; }
+  .verb-highlight {
+    background: linear-gradient(135deg, rgba(247,151,30,0.25), rgba(86,204,242,0.25));
+    border-radius: 8px; padding: 2px 10px; border: 2px dashed #8b82c4;
+    display: inline-block; font-style: italic; color: #d4c8ff;
+  }
+  .hint { font-size: 0.78rem; color: var(--muted); margin-bottom: 16px; font-style: italic; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-bottom: 14px; }
+  .choice-btn {
+    padding: 13px 8px; border-radius: 16px; border: 3px solid transparent;
+    font-family: 'Nunito', sans-serif; font-size: 0.92rem; font-weight: 800;
+    cursor: pointer; transition: all 0.2s ease;
+  }
+  .choice-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .choice-btn:active:not(:disabled) { transform: scale(0.97); }
+  .choice-btn.gerund-btn { background: linear-gradient(135deg, rgba(247,151,30,0.15), rgba(247,151,30,0.05)); border-color: var(--gerund); color: var(--gerund); }
+  .choice-btn.infinitive-btn { background: linear-gradient(135deg, rgba(86,204,242,0.15), rgba(86,204,242,0.05)); border-color: var(--infinitive); color: var(--infinitive); }
+  .choice-btn.correct-ans { background: linear-gradient(135deg, rgba(67,233,123,0.2), rgba(67,233,123,0.1)); border-color: var(--correct); color: var(--correct); animation: popIn 0.3s ease; }
+  .choice-btn.wrong-ans { background: linear-gradient(135deg, rgba(245,87,108,0.2), rgba(245,87,108,0.1)); border-color: var(--wrong); color: var(--wrong); animation: shake 0.4s ease; }
+  .choice-btn:disabled { cursor: default; }
+  @keyframes popIn { 0%{transform:scale(0.95)} 60%{transform:scale(1.06)} 100%{transform:scale(1)} }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+  .explanation {
+    background: rgba(255,255,255,0.04); border-radius: 14px; padding: 11px 14px;
+    font-size: 0.83rem; line-height: 1.6; color: #c5beff; text-align: left;
+    display: none; margin-bottom: 13px; border-left: 4px solid var(--infinitive);
+  }
+  .explanation.show { display: block; animation: fadeUp 0.3s ease; }
+  .explanation strong { color: #fff; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .next-btn {
+    padding: 11px 34px; border-radius: 50px; border: none;
+    background: linear-gradient(135deg, var(--gerund), #f85032); color: white;
+    font-family: 'Fredoka One', cursive; font-size: 1.05rem; cursor: pointer;
+    display: none; margin: 0 auto; transition: all 0.2s ease;
+    box-shadow: 0 6px 20px rgba(247,151,30,0.35);
+  }
+  .next-btn:hover { transform: translateY(-2px); }
+  .next-btn.show { display: inline-block; animation: fadeUp 0.3s ease; }
+  .legend { display: flex; gap: 20px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--muted); font-weight: 700; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .results-screen { display: none; text-align: center; max-width: 520px; width: 100%; }
+  .results-screen.show { display: block; animation: fadeUp 0.5s ease; }
+  .results-emoji { font-size: 5rem; margin-bottom: 10px; }
+  .results-title { font-family: 'Fredoka One', cursive; font-size: 2rem; margin-bottom: 8px; background: linear-gradient(135deg, var(--gerund), var(--infinitive)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .results-score { font-size: 3rem; font-weight: 800; margin: 12px 0; }
+  .results-msg { color: var(--muted); margin-bottom: 22px; font-size: 1rem; }
+  .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .restart-btn {
+    padding: 13px 36px; border-radius: 50px; border: none;
+    background: linear-gradient(135deg, var(--infinitive), #2f80ed); color: white;
+    font-family: 'Fredoka One', cursive; font-size: 1.05rem; cursor: pointer;
+    box-shadow: 0 8px 24px rgba(86,204,242,0.35); transition: all 0.2s ease;
+  }
+  .restart-btn:hover { transform: translateY(-2px); }
+  .toast {
+    position: fixed; top: 24px; left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    padding: 10px 26px; border-radius: 50px; font-weight: 800; font-size: 0.95rem;
+    transition: transform 0.4s cubic-bezier(.34,1.56,.64,1); z-index: 999; pointer-events: none;
+  }
+  .toast.correct { background: var(--correct); color: #0f3320; }
+  .toast.wrong { background: var(--wrong); color: #3a000a; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<h1>🎯 Gerund vs Infinitive</h1>
+<p class="subtitle">150 ta savol — eng ko'p ishlatiladigan fe'llar bo'yicha</p>
+
+<div class="mode-select">
+  <button class="mode-btn active" onclick="setMode(15,this)">🚀 15 ta</button>
+  <button class="mode-btn" onclick="setMode(30,this)">⚡ 30 ta</button>
+  <button class="mode-btn" onclick="setMode(50,this)">🔥 50 ta</button>
+  <button class="mode-btn" onclick="setMode(150,this)">💯 150 ta</button>
+</div>
+
+<div class="scorebar">
+  <div class="score-box">✅ <b id="correct-count">0</b></div>
+  <div class="score-box">❌ <b id="wrong-count">0</b></div>
+  <div class="score-box">🎯 <b id="q-num">1</b>/<b id="q-total">15</b></div>
+</div>
+<div class="progress-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+
+<div class="card" id="game-card">
+  <div class="question-num" id="q-label">SAVOL 1 / 15</div>
+  <div id="cat-tag"></div>
+  <div class="sentence" id="sentence-text"></div>
+  <div class="hint" id="hint-text"></div>
+  <div class="choices" id="choices-wrap"></div>
+  <div class="explanation" id="explanation"></div>
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()">Keyingisi →</button>
+</div>
+
+<div class="results-screen" id="results-screen">
+  <div class="results-emoji" id="r-emoji">🏆</div>
+  <div class="results-title">O'yin tugadi!</div>
+  <div class="results-score" id="r-score"></div>
+  <div class="results-msg" id="r-msg"></div>
+  <div class="btn-row">
+    <button class="restart-btn" onclick="startGame()">🔄 Qayta</button>
+    <button class="restart-btn" style="background:linear-gradient(135deg,var(--gerund),#f85032)" onclick="setMode(150,null);startGame()">💯 150 ta</button>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--gerund)"></div> Gerund (-ing)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--infinitive)"></div> Infinitive (to + V)</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const Q = [
+// ENJOY
+{s:"She enjoys ___ (read) books before bed.",a:"reading",c:["reading","to read"],t:"gerund",cat:"enjoy",ex:"<strong>enjoy + V-ing</strong> — enjoy har doim Gerund oladi. 'enjoy to read' — NOTO'G'RI."},
+{s:"He enjoys ___ (play) chess with his grandfather.",a:"playing",c:["playing","to play"],t:"gerund",cat:"enjoy",ex:"<strong>enjoy + V-ing</strong>. Boshqalar ham: finish, avoid, mind, keep, miss, suggest."},
+{s:"They enjoy ___ (watch) movies on weekends.",a:"watching",c:["watching","to watch"],t:"gerund",cat:"enjoy",ex:"<strong>enjoy</strong> Gerund bilan. Infinitive ishlatilmaydi."},
+{s:"We enjoy ___ (hike) in the mountains every summer.",a:"hiking",c:["hiking","to hike"],t:"gerund",cat:"enjoy",ex:"<strong>enjoy hiking</strong> — to'g'ri. enjoy + V-ing."},
+{s:"She enjoys ___ (cook) Italian food for her friends.",a:"cooking",c:["cooking","to cook"],t:"gerund",cat:"enjoy",ex:"<strong>enjoy</strong> doim -ing oladi. Istisno yo'q."},
+
+// LIKE / LOVE / HATE
+{s:"I like ___ (swim) in the ocean.",a:"swimming",c:["swimming","to swim"],t:"gerund",cat:"like/love/hate",ex:"<strong>like + -ing</strong> — umumiy odat. like + to — ma'lum bir paytda xohish. Bu yerda odat."},
+{s:"She loves ___ (dance) at parties.",a:"dancing",c:["dancing","to dance"],t:"gerund",cat:"like/love/hate",ex:"<strong>love + -ing</strong> — qilishdan zavq olish, umumiy sevimli ish."},
+{s:"He hates ___ (wait) in long queues.",a:"waiting",c:["waiting","to wait"],t:"gerund",cat:"like/love/hate",ex:"<strong>hate + -ing</strong> — odatdan nafratlanish."},
+{s:"They love ___ (travel) to new countries.",a:"traveling",c:["traveling","to travel"],t:"gerund",cat:"like/love/hate",ex:"<strong>love + -ing</strong> — umumiy qiziqish."},
+{s:"I hate ___ (get) up early on Mondays.",a:"getting",c:["getting","to get"],t:"gerund",cat:"like/love/hate",ex:"<strong>hate + -ing</strong> — odatdan nafratlanish."},
+
+// AVOID
+{s:"She avoids ___ (eat) junk food.",a:"eating",c:["eating","to eat"],t:"gerund",cat:"avoid",ex:"<strong>avoid + V-ing</strong> — har doim Gerund. 'avoid to eat' — NOTO'G'RI."},
+{s:"He avoids ___ (drive) during rush hour.",a:"driving",c:["driving","to drive"],t:"gerund",cat:"avoid",ex:"<strong>avoid + V-ing</strong> — qilmaslikka harakat qilish."},
+{s:"They avoid ___ (make) eye contact with strangers.",a:"making",c:["making","to make"],t:"gerund",cat:"avoid",ex:"<strong>avoid</strong> Infinitive qabul qilmaydi."},
+{s:"I always avoid ___ (argue) with my boss.",a:"arguing",c:["arguing","to argue"],t:"gerund",cat:"avoid",ex:"<strong>avoid arguing</strong> — to'g'ri. avoid + V-ing."},
+{s:"She avoids ___ (spend) too much money.",a:"spending",c:["spending","to spend"],t:"gerund",cat:"avoid",ex:"<strong>avoid + -ing</strong>. Bu fe'l hech qachon Infinitive olmaydi."},
+
+// FINISH
+{s:"He finished ___ (write) the report at midnight.",a:"writing",c:["writing","to write"],t:"gerund",cat:"finish",ex:"<strong>finish + V-ing</strong> — ishni tamom qilish."},
+{s:"She finished ___ (read) the novel in two days.",a:"reading",c:["reading","to read"],t:"gerund",cat:"finish",ex:"<strong>finish reading</strong> — to'g'ri. 'finish to read' — NOTO'G'RI."},
+{s:"They finished ___ (build) the bridge last week.",a:"building",c:["building","to build"],t:"gerund",cat:"finish",ex:"<strong>finish + V-ing</strong> qoidasi."},
+{s:"I finally finished ___ (clean) the whole house.",a:"cleaning",c:["cleaning","to clean"],t:"gerund",cat:"finish",ex:"<strong>finish</strong> Gerund bilan. Qoida: finish + V-ing."},
+
+// SUGGEST
+{s:"She suggested ___ (take) the bus instead of driving.",a:"taking",c:["taking","to take"],t:"gerund",cat:"suggest",ex:"<strong>suggest + V-ing</strong>. HECH QACHON Infinitive olmaydi. 'suggested to take' — NOTO'G'RI."},
+{s:"He suggested ___ (open) a new restaurant downtown.",a:"opening",c:["opening","to open"],t:"gerund",cat:"suggest",ex:"<strong>suggest + V-ing</strong>. Bu qoida o'zgarmas."},
+{s:"They suggested ___ (meet) at the café at noon.",a:"meeting",c:["meeting","to meet"],t:"gerund",cat:"suggest",ex:"<strong>suggest meeting</strong> — to'g'ri. suggest + V-ing."},
+
+// MIND
+{s:"Would you mind ___ (close) the door, please?",a:"closing",c:["closing","to close"],t:"gerund",cat:"mind",ex:"<strong>mind + V-ing</strong> — 'Would you mind closing?' standart iltimos shakli."},
+{s:"I don't mind ___ (work) late if necessary.",a:"working",c:["working","to work"],t:"gerund",cat:"mind",ex:"<strong>mind + V-ing</strong> — ijobiy/salbiy shaklda ham Gerund."},
+{s:"Does she mind ___ (share) her office?",a:"sharing",c:["sharing","to share"],t:"gerund",cat:"mind",ex:"<strong>mind</strong> faqat Gerund bilan. 'Does she mind sharing?' — to'g'ri."},
+
+// KEEP
+{s:"He kept ___ (talk) even after the meeting ended.",a:"talking",c:["talking","to talk"],t:"gerund",cat:"keep",ex:"<strong>keep + V-ing</strong> — davom etmoq, to'xtatmaslik."},
+{s:"She keeps ___ (forget) her keys at home.",a:"forgetting",c:["forgetting","to forget"],t:"gerund",cat:"keep",ex:"<strong>keep + V-ing</strong> — takror-takror qilish."},
+{s:"They kept ___ (run) even when they were tired.",a:"running",c:["running","to run"],t:"gerund",cat:"keep",ex:"<strong>keep running</strong> — to'xtatmasdan davom etish."},
+{s:"He keeps ___ (interrupt) me when I'm speaking.",a:"interrupting",c:["interrupting","to interrupt"],t:"gerund",cat:"keep",ex:"<strong>keep + V-ing</strong> — bezovta harakat takrorlanmoqda."},
+
+// MISS
+{s:"She misses ___ (see) her old friends.",a:"seeing",c:["seeing","to see"],t:"gerund",cat:"miss",ex:"<strong>miss + V-ing</strong> — sog'inish, yo'qligidan afsuslanish."},
+{s:"He misses ___ (eat) his mother's cooking.",a:"eating",c:["eating","to eat"],t:"gerund",cat:"miss",ex:"<strong>miss + V-ing</strong>. 'miss to eat' — NOTO'G'RI."},
+{s:"I miss ___ (live) in my hometown.",a:"living",c:["living","to live"],t:"gerund",cat:"miss",ex:"<strong>miss living</strong> — to'g'ri. miss + V-ing."},
+
+// CONSIDER
+{s:"She is considering ___ (change) her career.",a:"changing",c:["changing","to change"],t:"gerund",cat:"consider",ex:"<strong>consider + V-ing</strong> — mulohaza qilmoq. 'considering to change' — NOTO'G'RI."},
+{s:"He considered ___ (move) to another city.",a:"moving",c:["moving","to move"],t:"gerund",cat:"consider",ex:"<strong>consider + V-ing</strong>. Infinitive qabul qilmaydi."},
+{s:"They are considering ___ (buy) a new house.",a:"buying",c:["buying","to buy"],t:"gerund",cat:"consider",ex:"<strong>consider</strong> Gerund bilan. O'ylash + V-ing."},
+
+// ADMIT / DENY
+{s:"He admitted ___ (steal) the money.",a:"stealing",c:["stealing","to steal"],t:"gerund",cat:"admit/deny",ex:"<strong>admit + V-ing</strong> — itiroflar bildiruvchi fe'llar Gerund oladi: admit, deny, confess."},
+{s:"She denied ___ (break) the vase.",a:"breaking",c:["breaking","to break"],t:"gerund",cat:"admit/deny",ex:"<strong>deny + V-ing</strong> — inkor qilish + Gerund."},
+{s:"He admitted ___ (make) a serious mistake.",a:"making",c:["making","to make"],t:"gerund",cat:"admit/deny",ex:"<strong>admit + V-ing</strong>. 'admit to make' — NOTO'G'RI."},
+{s:"She denied ___ (send) that email.",a:"sending",c:["sending","to send"],t:"gerund",cat:"admit/deny",ex:"<strong>deny + V-ing</strong> qoidasi o'zgarmas."},
+
+// IMAGINE
+{s:"I can't imagine ___ (live) without the internet.",a:"living",c:["living","to live"],t:"gerund",cat:"imagine",ex:"<strong>imagine + V-ing</strong> — tasavvur qilish + Gerund."},
+{s:"She imagined ___ (win) the lottery someday.",a:"winning",c:["winning","to win"],t:"gerund",cat:"imagine",ex:"<strong>imagine + V-ing</strong>. Infinitive bu yerda ishlatilmaydi."},
+
+// PRACTISE
+{s:"He practises ___ (speak) English every morning.",a:"speaking",c:["speaking","to speak"],t:"gerund",cat:"practise",ex:"<strong>practise + V-ing</strong> — mashq qilish + Gerund."},
+{s:"She practises ___ (play) the piano for two hours daily.",a:"playing",c:["playing","to play"],t:"gerund",cat:"practise",ex:"<strong>practise + V-ing</strong>. 'practise to play' — NOTO'G'RI."},
+
+// RISK
+{s:"He risked ___ (lose) his job by arriving late.",a:"losing",c:["losing","to lose"],t:"gerund",cat:"risk",ex:"<strong>risk + V-ing</strong> — xavf ostiga qo'yish + Gerund."},
+{s:"She risked ___ (hurt) herself by climbing.",a:"hurting",c:["hurting","to hurt"],t:"gerund",cat:"risk",ex:"<strong>risk + V-ing</strong>. Infinitive qabul qilmaydi."},
+
+// GIVE UP / QUIT
+{s:"He gave up ___ (smoke) three years ago.",a:"smoking",c:["smoking","to smoke"],t:"gerund",cat:"give up/quit",ex:"<strong>give up + V-ing</strong> — tark etish, qilishni to'xtatish."},
+{s:"She quit ___ (work) at the company last month.",a:"working",c:["working","to work"],t:"gerund",cat:"give up/quit",ex:"<strong>quit + V-ing</strong>. 'quit working' — to'xtatish."},
+{s:"He gave up ___ (try) to fix the old car.",a:"trying",c:["trying","to try"],t:"gerund",cat:"give up/quit",ex:"<strong>give up + V-ing</strong> — harakat qilishni to'xtatish."},
+{s:"She quit ___ (eat) meat last year.",a:"eating",c:["eating","to eat"],t:"gerund",cat:"give up/quit",ex:"<strong>quit + V-ing</strong> qoidasi."},
+
+// POSTPONE / DELAY / PUT OFF
+{s:"She postponed ___ (make) a decision until next week.",a:"making",c:["making","to make"],t:"gerund",cat:"postpone/delay",ex:"<strong>postpone + V-ing</strong> — kechiktirish + Gerund."},
+{s:"He delayed ___ (tell) her the bad news.",a:"telling",c:["telling","to tell"],t:"gerund",cat:"postpone/delay",ex:"<strong>delay + V-ing</strong>. 'delay telling' — kechiktirish."},
+{s:"They put off ___ (fix) the roof until summer.",a:"fixing",c:["fixing","to fix"],t:"gerund",cat:"postpone/delay",ex:"<strong>put off + V-ing</strong>. 'put off fixing' — keyinga qoldirish."},
+
+// WANT
+{s:"I want ___ (learn) a new language this year.",a:"to learn",c:["learning","to learn"],t:"infinitive",cat:"want",ex:"<strong>want + to + V</strong> — xohish bildiruvchi fe'llar Infinitive oladi."},
+{s:"She wants ___ (become) a doctor.",a:"to become",c:["becoming","to become"],t:"infinitive",cat:"want",ex:"<strong>want + to + V</strong>. 'want becoming' — NOTO'G'RI."},
+{s:"He wants ___ (buy) a new car next year.",a:"to buy",c:["buying","to buy"],t:"infinitive",cat:"want",ex:"<strong>want</strong> doim Infinitive bilan. want to buy, want to go, want to see."},
+{s:"They want ___ (visit) Rome this summer.",a:"to visit",c:["visiting","to visit"],t:"infinitive",cat:"want",ex:"<strong>want to visit</strong> — to'g'ri. want + Infinitive."},
+{s:"We want ___ (start) a new project next month.",a:"to start",c:["starting","to start"],t:"infinitive",cat:"want",ex:"<strong>want + to + V</strong> — xohish. Gerund ishlatilmaydi."},
+
+// DECIDE
+{s:"She decided ___ (quit) her job.",a:"to quit",c:["quitting","to quit"],t:"infinitive",cat:"decide",ex:"<strong>decide + to + V</strong> — qaror qabul qilish + Infinitive."},
+{s:"He decided ___ (move) to another city.",a:"to move",c:["moving","to move"],t:"infinitive",cat:"decide",ex:"<strong>decide to move</strong> — to'g'ri. 'decide moving' — NOTO'G'RI."},
+{s:"They decided ___ (open) a small business.",a:"to open",c:["opening","to open"],t:"infinitive",cat:"decide",ex:"<strong>decide + Infinitive</strong>."},
+{s:"I decided ___ (study) medicine at university.",a:"to study",c:["studying","to study"],t:"infinitive",cat:"decide",ex:"<strong>decide to study</strong> — to'g'ri. decide + to + V."},
+
+// HOPE
+{s:"We hope ___ (see) you at the party.",a:"to see",c:["seeing","to see"],t:"infinitive",cat:"hope",ex:"<strong>hope + to + V</strong> — umid qilish + Infinitive."},
+{s:"She hopes ___ (get) a promotion this year.",a:"to get",c:["getting","to get"],t:"infinitive",cat:"hope",ex:"<strong>hope to get</strong> — to'g'ri."},
+{s:"He hopes ___ (travel) around the world someday.",a:"to travel",c:["traveling","to travel"],t:"infinitive",cat:"hope",ex:"<strong>hope + to + V</strong>. 'hope traveling' — NOTO'G'RI."},
+{s:"They hope ___ (finish) the project on time.",a:"to finish",c:["finishing","to finish"],t:"infinitive",cat:"hope",ex:"<strong>hope to finish</strong> — to'g'ri."},
+
+// PLAN
+{s:"She plans ___ (study) abroad next year.",a:"to study",c:["studying","to study"],t:"infinitive",cat:"plan",ex:"<strong>plan + to + V</strong> — reja qilish + Infinitive."},
+{s:"He plans ___ (open) a restaurant downtown.",a:"to open",c:["opening","to open"],t:"infinitive",cat:"plan",ex:"<strong>plan to open</strong> — to'g'ri."},
+{s:"They plan ___ (launch) a new product next quarter.",a:"to launch",c:["launching","to launch"],t:"infinitive",cat:"plan",ex:"<strong>plan + to + V</strong>. 'plan launching' — NOTO'G'RI."},
+
+// PROMISE
+{s:"She promised ___ (call) him back.",a:"to call",c:["calling","to call"],t:"infinitive",cat:"promise",ex:"<strong>promise + to + V</strong> — va'da berish + Infinitive."},
+{s:"He promised ___ (help) with the project.",a:"to help",c:["helping","to help"],t:"infinitive",cat:"promise",ex:"<strong>promise to help</strong> — to'g'ri."},
+{s:"They promised ___ (deliver) the package by Friday.",a:"to deliver",c:["delivering","to deliver"],t:"infinitive",cat:"promise",ex:"<strong>promise + to + V</strong>. Va'da har doim Infinitive bilan."},
+
+// REFUSE
+{s:"He refused ___ (sign) the contract.",a:"to sign",c:["signing","to sign"],t:"infinitive",cat:"refuse",ex:"<strong>refuse + to + V</strong> — rad etish + Infinitive."},
+{s:"She refused ___ (answer) any questions.",a:"to answer",c:["answering","to answer"],t:"infinitive",cat:"refuse",ex:"<strong>refuse to answer</strong> — to'g'ri. 'refuse answering' — NOTO'G'RI."},
+{s:"They refused ___ (pay) the extra fee.",a:"to pay",c:["paying","to pay"],t:"infinitive",cat:"refuse",ex:"<strong>refuse + to + V</strong>."},
+
+// AGREE
+{s:"She agreed ___ (work) overtime this weekend.",a:"to work",c:["working","to work"],t:"infinitive",cat:"agree",ex:"<strong>agree + to + V</strong> — rozilik berish + Infinitive."},
+{s:"He agreed ___ (pay) for the dinner.",a:"to pay",c:["paying","to pay"],t:"infinitive",cat:"agree",ex:"<strong>agree to pay</strong> — to'g'ri."},
+{s:"They agreed ___ (meet) at the airport.",a:"to meet",c:["meeting","to meet"],t:"infinitive",cat:"agree",ex:"<strong>agree + to + V</strong>. 'agree meeting' — NOTO'G'RI."},
+{s:"They agreed ___ (split) the bill equally.",a:"to split",c:["splitting","to split"],t:"infinitive",cat:"agree",ex:"<strong>agree to split</strong> — agree + Infinitive qoidasi."},
+
+// OFFER
+{s:"He offered ___ (drive) her to the station.",a:"to drive",c:["driving","to drive"],t:"infinitive",cat:"offer",ex:"<strong>offer + to + V</strong> — taklif qilish + Infinitive."},
+{s:"She offered ___ (help) us move the furniture.",a:"to help",c:["helping","to help"],t:"infinitive",cat:"offer",ex:"<strong>offer to help</strong> — to'g'ri."},
+
+// MANAGE
+{s:"She managed ___ (finish) the task before the deadline.",a:"to finish",c:["finishing","to finish"],t:"infinitive",cat:"manage",ex:"<strong>manage + to + V</strong> — uddalay olmoq + Infinitive."},
+{s:"He managed ___ (escape) from the burning building.",a:"to escape",c:["escaping","to escape"],t:"infinitive",cat:"manage",ex:"<strong>manage to escape</strong> — to'g'ri."},
+
+// FAIL
+{s:"He failed ___ (pass) the driving test.",a:"to pass",c:["passing","to pass"],t:"infinitive",cat:"fail",ex:"<strong>fail + to + V</strong> — udday olmay qolmoq + Infinitive."},
+{s:"She failed ___ (convince) her parents.",a:"to convince",c:["convincing","to convince"],t:"infinitive",cat:"fail",ex:"<strong>fail to convince</strong> — to'g'ri. 'fail convincing' — NOTO'G'RI."},
+
+// LEARN / TEACH
+{s:"She learned ___ (speak) three languages.",a:"to speak",c:["speaking","to speak"],t:"infinitive",cat:"learn/teach",ex:"<strong>learn + to + V</strong> — o'rganmoq + Infinitive."},
+{s:"He taught her ___ (ride) a bike.",a:"to ride",c:["riding","to ride"],t:"infinitive",cat:"learn/teach",ex:"<strong>teach someone + to + V</strong>. 'taught her to ride' — to'g'ri."},
+{s:"She is learning ___ (drive) a car.",a:"to drive",c:["driving","to drive"],t:"infinitive",cat:"learn/teach",ex:"<strong>learn + to + V</strong>. 'learning to drive' — to'g'ri."},
+
+// NEED
+{s:"We need ___ (buy) more groceries.",a:"to buy",c:["buying","to buy"],t:"infinitive",cat:"need",ex:"<strong>need + to + V</strong> (shaxs subyekt bilan) — keraklik + Infinitive."},
+{s:"She needs ___ (rest) after the long journey.",a:"to rest",c:["resting","to rest"],t:"infinitive",cat:"need",ex:"<strong>need to rest</strong> — to'g'ri."},
+
+// SEEM / APPEAR
+{s:"She seems ___ (know) everyone in the room.",a:"to know",c:["knowing","to know"],t:"infinitive",cat:"seem/appear",ex:"<strong>seem + to + V</strong> — ko'rinmoq + Infinitive."},
+{s:"He appears ___ (be) very confident.",a:"to be",c:["being","to be"],t:"infinitive",cat:"seem/appear",ex:"<strong>appear + to + V</strong>. 'appear to be' — ko'rinish."},
+
+// EXPECT
+{s:"I expect ___ (hear) from them by Monday.",a:"to hear",c:["hearing","to hear"],t:"infinitive",cat:"expect",ex:"<strong>expect + to + V</strong> — kutmoq + Infinitive."},
+{s:"She expects ___ (get) the results tomorrow.",a:"to get",c:["getting","to get"],t:"infinitive",cat:"expect",ex:"<strong>expect to get</strong> — kutish + Infinitive."},
+{s:"They expect ___ (win) the championship.",a:"to win",c:["winning","to win"],t:"infinitive",cat:"expect",ex:"<strong>expect + to + V</strong>. 'expect winning' — NOTO'G'RI."},
+
+// CHOOSE
+{s:"He chose ___ (stay) home instead of going out.",a:"to stay",c:["staying","to stay"],t:"infinitive",cat:"choose",ex:"<strong>choose + to + V</strong> — tanlamoq + Infinitive."},
+{s:"She chose ___ (study) art at university.",a:"to study",c:["studying","to study"],t:"infinitive",cat:"choose",ex:"<strong>choose to study</strong> — to'g'ri."},
+
+// FORGET / REMEMBER
+{s:"She forgot ___ (turn off) the lights before leaving.",a:"to turn off",c:["turning off","to turn off"],t:"infinitive",cat:"forget/remember",ex:"<strong>forget + to</strong> = qilish kerak bo'lganini unutish. 'forget + -ing' = qilganini unutish."},
+{s:"He remembered ___ (lock) the door this time.",a:"to lock",c:["locking","to lock"],t:"infinitive",cat:"forget/remember",ex:"<strong>remember + to</strong> = eslab qilmoq. 'remember + -ing' = qilganini eslab qolmoq."},
+{s:"I forgot ___ (bring) my wallet.",a:"to bring",c:["bringing","to bring"],t:"infinitive",cat:"forget/remember",ex:"<strong>forget to bring</strong> — olishni unutish. Infinitive — kerakli ish."},
+{s:"She remembers ___ (meet) him at the conference last year.",a:"meeting",c:["meeting","to meet"],t:"gerund",cat:"forget/remember",ex:"<strong>remember + -ing</strong> = o'tmishdagi hodisani eslash. Bu yerda o'tgan voqea."},
+{s:"He forgot ___ (tell) her about the meeting.",a:"to tell",c:["telling","to tell"],t:"infinitive",cat:"forget/remember",ex:"<strong>forget to tell</strong> — xabar berishni unutish (bo'lmagan ish)."},
+{s:"I remember ___ (visit) Paris as a child.",a:"visiting",c:["visiting","to visit"],t:"gerund",cat:"forget/remember",ex:"<strong>remember + -ing</strong> — bolalikda borgan yer eslanmoqda. O'tmish hodisa."},
+
+// STOP
+{s:"She stopped ___ (smoke) two years ago.",a:"smoking",c:["smoking","to smoke"],t:"gerund",cat:"stop",ex:"<strong>stop + -ing</strong> = qilishni to'xtatish. 'stopped smoking' — tamoman to'xtatish."},
+{s:"He stopped ___ (buy) a newspaper on his way home.",a:"to buy",c:["buying","to buy"],t:"infinitive",cat:"stop",ex:"<strong>stop + to</strong> = biror narsa uchun to'xtash. 'stopped to buy' — gazeta olish uchun to'xtadi."},
+{s:"They stopped ___ (talk) when the teacher entered.",a:"talking",c:["talking","to talk"],t:"gerund",cat:"stop",ex:"<strong>stop + -ing</strong> = to'xtatish. Gerund = to'xtatilgan harakat."},
+
+// TRY
+{s:"She tried ___ (open) the jar but couldn't.",a:"to open",c:["opening","to open"],t:"infinitive",cat:"try",ex:"<strong>try + to</strong> = urinib ko'rmoq (muvaffaqiyatsiz). 'tried to open' — ocha olmadi."},
+{s:"He tried ___ (add) more salt to improve the flavor.",a:"adding",c:["adding","to add"],t:"gerund",cat:"try",ex:"<strong>try + -ing</strong> = bir usul sifatida sinab ko'rmoq. 'tried adding' — qo'shib ko'rdi."},
+{s:"She tried ___ (call) him but got no answer.",a:"to call",c:["calling","to call"],t:"infinitive",cat:"try",ex:"<strong>try to call</strong> — qo'ng'iroq qilishga urindi."},
+
+// REGRET
+{s:"I regret ___ (tell) you that your application was rejected.",a:"to tell",c:["telling","to tell"],t:"infinitive",cat:"regret",ex:"<strong>regret + to</strong> = rasmiy xabar berish uchun afsuslanish."},
+{s:"She regrets ___ (not study) harder in school.",a:"not studying",c:["not studying","not to study"],t:"gerund",cat:"regret",ex:"<strong>regret + -ing</strong> = o'tmishdagi ishga pushaymon bo'lish."},
+
+// GO + GERUND
+{s:"They went ___ (swim) at the beach yesterday.",a:"swimming",c:["swimming","to swim"],t:"gerund",cat:"go + -ing",ex:"<strong>go + V-ing</strong> — sport/dam olish faoliyatlari. go swimming, go fishing, go shopping."},
+{s:"She goes ___ (jog) every morning.",a:"jogging",c:["jogging","to jog"],t:"gerund",cat:"go + -ing",ex:"<strong>go jogging</strong> — faoliyat. 'go to jog' — NOTO'G'RI."},
+{s:"He went ___ (fish) with his father on Sunday.",a:"fishing",c:["fishing","to fish"],t:"gerund",cat:"go + -ing",ex:"<strong>go fishing</strong> — baliq tutishga bormoq."},
+{s:"Let's go ___ (shop) at the new mall.",a:"shopping",c:["shopping","to shop"],t:"gerund",cat:"go + -ing",ex:"<strong>go shopping</strong> — xarid qilishga bormoq."},
+{s:"They went ___ (ski) in the Alps last winter.",a:"skiing",c:["skiing","to ski"],t:"gerund",cat:"go + -ing",ex:"<strong>go + V-ing</strong> — sport faoliyati."},
+
+// BE WORTH
+{s:"This movie is worth ___ (watch).",a:"watching",c:["watching","to watch"],t:"gerund",cat:"worth",ex:"<strong>worth + V-ing</strong> — ko'rishga arziydi."},
+{s:"The book is worth ___ (read) twice.",a:"reading",c:["reading","to read"],t:"gerund",cat:"worth",ex:"<strong>be worth + V-ing</strong>. 'worth reading' — o'qishga arziydi."},
+
+// LOOK FORWARD TO
+{s:"I'm looking forward to ___ (see) you next week.",a:"seeing",c:["seeing","to see"],t:"gerund",cat:"look forward to",ex:"<strong>look forward to + V-ing</strong> — 'to' bu yerda PREPOSITION, Infinitive belgisi emas! Gerund keladi."},
+{s:"She is looking forward to ___ (start) her new job.",a:"starting",c:["starting","to start"],t:"gerund",cat:"look forward to",ex:"<strong>look forward to + -ing</strong>. to = preposition → Gerund."},
+{s:"He is looking forward to ___ (meet) the new team.",a:"meeting",c:["meeting","to meet"],t:"gerund",cat:"look forward to",ex:"<strong>look forward to meeting</strong> — to'g'ri. to (preposition) + V-ing."},
+
+// BE USED TO / GET USED TO
+{s:"She is used to ___ (work) long hours.",a:"working",c:["working","to work"],t:"gerund",cat:"be/get used to",ex:"<strong>be used to + V-ing</strong> — odatlangan. 'to' = preposition → Gerund."},
+{s:"He got used to ___ (drive) on the left side.",a:"driving",c:["driving","to drive"],t:"gerund",cat:"be/get used to",ex:"<strong>get used to + V-ing</strong> — ko'nikib qolmoq. to = preposition → Gerund."},
+{s:"I'm getting used to ___ (wake) up early.",a:"waking",c:["waking","to wake"],t:"gerund",cat:"be/get used to",ex:"<strong>get used to + V-ing</strong>. to = preposition → Gerund."},
+
+// CAN'T HELP / CAN'T STAND
+{s:"I can't help ___ (laugh) when I see that video.",a:"laughing",c:["laughing","to laugh"],t:"gerund",cat:"can't help/stand",ex:"<strong>can't help + V-ing</strong> — o'zini tiya olmay qilmoq."},
+{s:"She can't stand ___ (wait) in long lines.",a:"waiting",c:["waiting","to wait"],t:"gerund",cat:"can't help/stand",ex:"<strong>can't stand + V-ing</strong> — ko'tarib bo'lmaslik."},
+{s:"He can't help ___ (think) about the problem.",a:"thinking",c:["thinking","to think"],t:"gerund",cat:"can't help/stand",ex:"<strong>can't help thinking</strong> — o'ydan chekkab bo'lmaydi."},
+
+// SPEND TIME
+{s:"She spends hours ___ (read) every day.",a:"reading",c:["reading","to read"],t:"gerund",cat:"spend time",ex:"<strong>spend time/hours + V-ing</strong> — vaqt sarflash + Gerund."},
+{s:"He spent the weekend ___ (fix) his car.",a:"fixing",c:["fixing","to fix"],t:"gerund",cat:"spend time",ex:"<strong>spend + time + V-ing</strong>. Gerund qoidasi."},
+{s:"She spends a lot of money ___ (buy) clothes.",a:"buying",c:["buying","to buy"],t:"gerund",cat:"spend time",ex:"<strong>spend money + V-ing</strong> — pul sarflash + Gerund."},
+
+// AFFORD
+{s:"She can't afford ___ (buy) a new laptop.",a:"to buy",c:["buying","to buy"],t:"infinitive",cat:"afford",ex:"<strong>afford + to + V</strong> — qo'lidan kelmoq + Infinitive."},
+{s:"He couldn't afford ___ (go) on holiday.",a:"to go",c:["going","to go"],t:"infinitive",cat:"afford",ex:"<strong>afford to go</strong> — imkoni bo'lmoq. 'afford going' — NOTO'G'RI."},
+
+// PRETEND
+{s:"She pretended ___ (be) asleep when her parents came in.",a:"to be",c:["being","to be"],t:"infinitive",cat:"pretend",ex:"<strong>pretend + to + V</strong> — ko'rinish yasash + Infinitive."},
+{s:"He pretended ___ (not hear) what she said.",a:"not to hear",c:["not hearing","not to hear"],t:"infinitive",cat:"pretend",ex:"<strong>pretend + not to + V</strong>. 'pretended not to hear' — eshitmayotgandek ko'rindi."},
+
+// TEND
+{s:"She tends ___ (forget) names easily.",a:"to forget",c:["forgetting","to forget"],t:"infinitive",cat:"tend",ex:"<strong>tend + to + V</strong> — moyil bo'lmoq + Infinitive."},
+{s:"He tends ___ (work) late at the office.",a:"to work",c:["working","to work"],t:"infinitive",cat:"tend",ex:"<strong>tend to work</strong> — to'g'ri. tend + Infinitive."},
+
+// DESERVE
+{s:"He deserves ___ (win) the award.",a:"to win",c:["winning","to win"],t:"infinitive",cat:"deserve",ex:"<strong>deserve + to + V</strong> — loyiq bo'lmoq + Infinitive."},
+{s:"She deserves ___ (get) a pay raise.",a:"to get",c:["getting","to get"],t:"infinitive",cat:"deserve",ex:"<strong>deserve to get</strong> — to'g'ri."},
+
+// ARRANGE
+{s:"She arranged ___ (meet) the clients at noon.",a:"to meet",c:["meeting","to meet"],t:"infinitive",cat:"arrange",ex:"<strong>arrange + to + V</strong> — tashkillashtirmoq + Infinitive."},
+
+// THREATEN
+{s:"He threatened ___ (call) the police.",a:"to call",c:["calling","to call"],t:"infinitive",cat:"threaten",ex:"<strong>threaten + to + V</strong>. threaten + Infinitive."},
+
+// PREPOSITION + GERUND
+{s:"She is interested in ___ (learn) new skills.",a:"learning",c:["learning","to learn"],t:"gerund",cat:"preposition + -ing",ex:"<strong>interested in + V-ing</strong> — prepositiondan keyin Gerund keladi."},
+{s:"He is good at ___ (solve) math problems.",a:"solving",c:["solving","to solve"],t:"gerund",cat:"preposition + -ing",ex:"<strong>good at + V-ing</strong> — preposition 'at' dan keyin Gerund."},
+{s:"She is tired of ___ (wait) for the bus.",a:"waiting",c:["waiting","to wait"],t:"gerund",cat:"preposition + -ing",ex:"<strong>tired of + V-ing</strong> — 'of' prepositiondan keyin Gerund."},
+{s:"He is capable of ___ (do) much better.",a:"doing",c:["doing","to do"],t:"gerund",cat:"preposition + -ing",ex:"<strong>capable of + V-ing</strong> — prepositiondan keyin Gerund."},
+{s:"She apologized for ___ (be) late.",a:"being",c:["being","to be"],t:"gerund",cat:"preposition + -ing",ex:"<strong>apologize for + V-ing</strong> — 'for' prepositiondan keyin Gerund."},
+{s:"He is thinking about ___ (change) his career.",a:"changing",c:["changing","to change"],t:"gerund",cat:"preposition + -ing",ex:"<strong>thinking about + V-ing</strong> — 'about' prepositiondan keyin Gerund."},
+{s:"She is excited about ___ (move) to a new city.",a:"moving",c:["moving","to move"],t:"gerund",cat:"preposition + -ing",ex:"<strong>excited about + V-ing</strong> — preposition + Gerund."},
+{s:"He insisted on ___ (pay) for dinner.",a:"paying",c:["paying","to pay"],t:"gerund",cat:"preposition + -ing",ex:"<strong>insist on + V-ing</strong> — 'on' prepositiondan keyin Gerund."},
+{s:"She complained about ___ (not get) enough support.",a:"not getting",c:["not getting","not to get"],t:"gerund",cat:"preposition + -ing",ex:"<strong>complained about + V-ing</strong>. Salbiy: not + V-ing."},
+{s:"He succeeded in ___ (find) a new job.",a:"finding",c:["finding","to find"],t:"gerund",cat:"preposition + -ing",ex:"<strong>succeed in + V-ing</strong> — 'in' prepositiondan keyin Gerund."},
+{s:"She is proud of ___ (win) the competition.",a:"winning",c:["winning","to win"],t:"gerund",cat:"preposition + -ing",ex:"<strong>proud of + V-ing</strong> — prepositiondan keyin Gerund."},
+{s:"He is responsible for ___ (check) the reports daily.",a:"checking",c:["checking","to check"],t:"gerund",cat:"preposition + -ing",ex:"<strong>responsible for + V-ing</strong> — 'for' prepositiondan keyin Gerund."},
+{s:"She is keen on ___ (travel) to Asia.",a:"traveling",c:["traveling","to travel"],t:"gerund",cat:"preposition + -ing",ex:"<strong>keen on + V-ing</strong> — 'on' prepositiondan keyin Gerund."},
+{s:"He is worried about ___ (lose) his job.",a:"losing",c:["losing","to lose"],t:"gerund",cat:"preposition + -ing",ex:"<strong>worried about + V-ing</strong> — 'about' prepositiondan keyin Gerund."},
+{s:"She is fed up with ___ (wait) for him.",a:"waiting",c:["waiting","to wait"],t:"gerund",cat:"preposition + -ing",ex:"<strong>fed up with + V-ing</strong> — 'with' prepositiondan keyin Gerund."},
+
+// IT + ADJ + TO
+{s:"It is important ___ (exercise) regularly.",a:"to exercise",c:["exercising","to exercise"],t:"infinitive",cat:"it + adj + to",ex:"<strong>It is + adjective + to + V</strong> — It is important to..., It is easy to..."},
+{s:"It is difficult ___ (learn) Japanese.",a:"to learn",c:["learning","to learn"],t:"infinitive",cat:"it + adj + to",ex:"<strong>It is difficult to learn</strong> — to'g'ri. It + adj + Infinitive."},
+{s:"It is nice ___ (meet) new people.",a:"to meet",c:["meeting","to meet"],t:"infinitive",cat:"it + adj + to",ex:"<strong>It is nice to meet</strong> — standart ibora. It + adj + to + V."},
+{s:"It was great ___ (see) you again.",a:"to see",c:["seeing","to see"],t:"infinitive",cat:"it + adj + to",ex:"<strong>It was great to see</strong> — to'g'ri."},
+
+// TOO + ADJ + TO
+{s:"He is too tired ___ (continue) working.",a:"to continue",c:["continuing","to continue"],t:"infinitive",cat:"too + adj + to",ex:"<strong>too + adjective + to + V</strong> — haddan ortiq ... bo'lgani uchun qila olmaslik."},
+{s:"The box is too heavy ___ (lift).",a:"to lift",c:["lifting","to lift"],t:"infinitive",cat:"too + adj + to",ex:"<strong>too heavy to lift</strong> — ko'tarish uchun juda og'ir."},
+{s:"She is too young ___ (drive).",a:"to drive",c:["driving","to drive"],t:"infinitive",cat:"too + adj + to",ex:"<strong>too young to drive</strong> — haydash uchun juda yosh."},
+
+// ADJ + ENOUGH + TO
+{s:"She is old enough ___ (drive).",a:"to drive",c:["driving","to drive"],t:"infinitive",cat:"adj + enough + to",ex:"<strong>adjective + enough + to + V</strong> — ... qilish uchun yetarli."},
+{s:"He is strong enough ___ (lift) the box.",a:"to lift",c:["lifting","to lift"],t:"infinitive",cat:"adj + enough + to",ex:"<strong>strong enough to lift</strong> — ko'tarish uchun kuchli."},
+{s:"She is clever enough ___ (solve) this problem.",a:"to solve",c:["solving","to solve"],t:"infinitive",cat:"adj + enough + to",ex:"<strong>clever enough to solve</strong> — yechish uchun aqlli."},
+
+// FIRST / LAST + TO
+{s:"She was the first ___ (arrive) at the party.",a:"to arrive",c:["arriving","to arrive"],t:"infinitive",cat:"first/last + to",ex:"<strong>the first/last/only + to + V</strong> — tartib sifat + Infinitive."},
+{s:"He was the last ___ (leave) the office.",a:"to leave",c:["leaving","to leave"],t:"infinitive",cat:"first/last + to",ex:"<strong>the last to leave</strong> — to'g'ri. the + ordinal + Infinitive."},
+
+// WOULD LIKE / LOVE / PREFER
+{s:"I would like ___ (speak) to the manager, please.",a:"to speak",c:["speaking","to speak"],t:"infinitive",cat:"would like/love",ex:"<strong>would like + to + V</strong> — nazokat bilan so'rash. would like + Infinitive."},
+{s:"She would love ___ (visit) New Zealand one day.",a:"to visit",c:["visiting","to visit"],t:"infinitive",cat:"would like/love",ex:"<strong>would love + to + V</strong>. would + like/love/hate/prefer + Infinitive."},
+{s:"They would prefer ___ (stay) at home tonight.",a:"to stay",c:["staying","to stay"],t:"infinitive",cat:"would like/love",ex:"<strong>would prefer + to + V</strong> — afzal ko'rmoq + Infinitive."},
+
+// PHRASAL / ADVANCED
+{s:"She burst out ___ (cry) when she heard the news.",a:"crying",c:["crying","to cry"],t:"gerund",cat:"phrasal verbs",ex:"<strong>burst out + V-ing</strong> — to'satdan boshlash. burst out crying/laughing/singing."},
+{s:"He felt like ___ (go) for a walk.",a:"going",c:["going","to go"],t:"gerund",cat:"feel like",ex:"<strong>feel like + V-ing</strong> — ishtahasi bo'lmoq, xohlamoq."},
+{s:"She felt like ___ (eat) something sweet.",a:"eating",c:["eating","to eat"],t:"gerund",cat:"feel like",ex:"<strong>feel like + V-ing</strong>. feel like eating — to'g'ri."},
+{s:"It's no use ___ (complain) about the weather.",a:"complaining",c:["complaining","to complain"],t:"gerund",cat:"it's no use",ex:"<strong>it's no use + V-ing</strong> — foydasiz. it's no use complaining."},
+{s:"There's no point in ___ (wait) any longer.",a:"waiting",c:["waiting","to wait"],t:"gerund",cat:"no point in",ex:"<strong>no point in + V-ing</strong> — 'in' prepositiondan keyin Gerund."},
+{s:"She ended up ___ (stay) at the hotel for three nights.",a:"staying",c:["staying","to stay"],t:"gerund",cat:"end up",ex:"<strong>end up + V-ing</strong> — oxirida shunday bo'lib qolmoq."},
+{s:"He ended up ___ (take) a taxi home.",a:"taking",c:["taking","to take"],t:"gerund",cat:"end up",ex:"<strong>end up + V-ing</strong>. end up taking — to'g'ri."},
+{s:"I'm having difficulty ___ (understand) this grammar rule.",a:"understanding",c:["understanding","to understand"],t:"gerund",cat:"difficulty/trouble",ex:"<strong>have difficulty + V-ing</strong> — qiyinchilik bilan + Gerund."},
+{s:"She has trouble ___ (sleep) when she's stressed.",a:"sleeping",c:["sleeping","to sleep"],t:"gerund",cat:"difficulty/trouble",ex:"<strong>have trouble + V-ing</strong>. trouble sleeping — qiynalish."},
+{s:"He is busy ___ (prepare) for the exam.",a:"preparing",c:["preparing","to prepare"],t:"gerund",cat:"be busy",ex:"<strong>be busy + V-ing</strong> — band bo'lmoq + Gerund."},
+{s:"She is busy ___ (write) her thesis.",a:"writing",c:["writing","to write"],t:"gerund",cat:"be busy",ex:"<strong>be busy + V-ing</strong>. busy writing — band."},
+{s:"It's worth ___ (try) this new restaurant.",a:"trying",c:["trying","to try"],t:"gerund",cat:"worth",ex:"<strong>worth + V-ing</strong>. worth trying — ko'rib/sinab ko'rishga arziydi."},
+];
+
+let questions=[], current=0, correct=0, wrong=0, answered=false, MODE=15;
+
+function setMode(n,btn){
+  MODE=n;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else document.querySelectorAll('.mode-btn').forEach(b=>{ if(b.textContent.includes(n)) b.classList.add('active'); });
+  startGame();
+}
+
+function shuffle(arr){ return [...arr].sort(()=>Math.random()-0.5); }
+
+function startGame(){
+  questions=shuffle(Q).slice(0,Math.min(MODE,Q.length));
+  current=0; correct=0; wrong=0; answered=false;
+  document.getElementById('results-screen').classList.remove('show');
+  document.getElementById('game-card').style.display='block';
+  document.getElementById('q-total').textContent=questions.length;
+  updateScore(); renderQuestion();
+}
+
+function renderQuestion(){
+  const q=questions[current]; answered=false;
+  document.getElementById('q-label').textContent=`SAVOL ${current+1} / ${questions.length}`;
+  document.getElementById('q-num').textContent=current+1;
+  document.getElementById('progress-bar').style.width=(current/questions.length*100)+'%';
+  document.getElementById('cat-tag').innerHTML=`<span class="category-tag ${q.t==='gerund'?'cat-gerund':'cat-infinitive'}">${q.cat}</span>`;
+  document.getElementById('sentence-text').innerHTML=q.s.replace(/___\s*\([^)]+\)/g,'<span class="verb-highlight">___</span>');
+  document.getElementById('hint-text').textContent=`Fe'l: "${q.a}"`;
+  const wrap=document.getElementById('choices-wrap');
+  wrap.innerHTML='';
+  shuffle(q.c).forEach(choice=>{
+    const isInf=choice.startsWith('to ')||choice.startsWith('not to');
+    const btn=document.createElement('button');
+    btn.className='choice-btn '+(isInf?'infinitive-btn':'gerund-btn');
+    btn.innerHTML=`<div style="font-size:0.66rem;opacity:0.7;margin-bottom:2px">${isInf?'INFINITIVE':'GERUND'}</div>${choice}`;
+    btn.onclick=()=>checkAnswer(choice,btn);
+    wrap.appendChild(btn);
+  });
+  document.getElementById('explanation').className='explanation';
+  document.getElementById('next-btn').className='next-btn';
+}
+
+function checkAnswer(choice,btn){
+  if(answered) return; answered=true;
+  const q=questions[current];
+  const isCorrect=choice===q.a;
+  document.querySelectorAll('.choice-btn').forEach(b=>{
+    b.disabled=true;
+    if(b.textContent.trim().includes(q.a)) b.classList.add('correct-ans');
+  });
+  if(isCorrect){ correct++; showToast("✅ To'g'ri!",'correct'); }
+  else { wrong++; btn.classList.add('wrong-ans'); showToast("❌ Noto'g'ri!",'wrong'); }
+  updateScore();
+  const ex=document.getElementById('explanation');
+  ex.innerHTML=q.ex; ex.classList.add('show');
+  document.getElementById('next-btn').classList.add('show');
+}
+
+function nextQuestion(){
+  current++;
+  if(current>=questions.length) showResults();
+  else renderQuestion();
+}
+
+function showResults(){
+  document.getElementById('game-card').style.display='none';
+  const pct=Math.round(correct/questions.length*100);
+  let emoji,msg;
+  if(pct>=90){emoji='🏆';msg='Mukammal! Siz Gerund/Infinitive ustasisiz! 🎉';}
+  else if(pct>=75){emoji='🌟';msg='Juda yaxshi! Oz-moz mashq va siz profesionalsiz!';}
+  else if(pct>=55){emoji='💪';msg='Yaxshi boshlanish! Qoidalarni qayta ko\'rib chiqing.';}
+  else{emoji='📚';msg='Qoidalarni yaxshilab o\'rganing va yana urinib ko\'ring!';}
+  document.getElementById('r-emoji').textContent=emoji;
+  document.getElementById('r-score').innerHTML=`<span style="color:var(--correct)">${correct}</span>/${questions.length} <span style="font-size:1rem;color:var(--muted)">(${pct}%)</span>`;
+  document.getElementById('r-msg').textContent=msg;
+  document.getElementById('results-screen').classList.add('show');
+}
+
+function updateScore(){
+  document.getElementById('correct-count').textContent=correct;
+  document.getElementById('wrong-count').textContent=wrong;
+}
+
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} show`;
+  setTimeout(()=>{t.className=`toast ${type}`;},1800);
+}
+
+startGame();
+</script>
+</body>
+</html>
