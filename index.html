@@ -503,7 +503,7 @@ function renderQuestion(){
   document.getElementById('progress-bar').style.width=(current/questions.length*100)+'%';
   document.getElementById('cat-tag').innerHTML=`<span class="category-tag ${q.t==='gerund'?'cat-gerund':'cat-infinitive'}">${q.cat}</span>`;
   document.getElementById('sentence-text').innerHTML=q.s.replace(/___\s*\([^)]+\)/g,'<span class="verb-highlight">___</span>');
-  document.getElementById('hint-text').textContent=`Fe'l: "${q.a}"`;
+  document.getElementById('hint-text').textContent='';
   const wrap=document.getElementById('choices-wrap');
   wrap.innerHTML='';
   shuffle(q.c).forEach(choice=>{
