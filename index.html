@@ -66,12 +66,6 @@
     background: radial-gradient(circle, rgba(86,204,242,0.08), transparent); pointer-events: none;
   }
   .question-num { font-size: 0.75rem; color: var(--muted); font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
-  .category-tag {
-    display: inline-block; font-size: 0.68rem; font-weight: 800; letter-spacing: 1.5px;
-    text-transform: uppercase; padding: 3px 10px; border-radius: 50px; margin-bottom: 8px;
-  }
-  .cat-gerund { background: rgba(247,151,30,0.15); color: var(--gerund); border: 1px solid var(--gerund); }
-  .cat-infinitive { background: rgba(86,204,242,0.15); color: var(--infinitive); border: 1px solid var(--infinitive); }
   .sentence { font-size: clamp(1rem, 3vw, 1.3rem); font-weight: 700; line-height: 1.7; margin-bottom: 8px; min-height: 60px; }
   .verb-highlight {
     background: linear-gradient(135deg, rgba(247,151,30,0.25), rgba(86,204,242,0.25));
@@ -501,7 +495,6 @@ function renderQuestion(){
   document.getElementById('q-label').textContent=`SAVOL ${current+1} / ${questions.length}`;
   document.getElementById('q-num').textContent=current+1;
   document.getElementById('progress-bar').style.width=(current/questions.length*100)+'%';
-  document.getElementById('cat-tag').innerHTML=`<span class="category-tag ${q.t==='gerund'?'cat-gerund':'cat-infinitive'}">${q.cat}</span>`;
   document.getElementById('sentence-text').innerHTML=q.s.replace(/___\s*\([^)]+\)/g,'<span class="verb-highlight">___</span>');
   document.getElementById('hint-text').textContent='';
   const wrap=document.getElementById('choices-wrap');
